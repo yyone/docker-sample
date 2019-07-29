@@ -1,19 +1,16 @@
-FROM jenkins/jenkins:2.112
+FROM jenkins/jenkins:lts-alpine
 
 USER root
 
-RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list.d/docker.list \
-      && apt-get update \
-      && apt-get install -y apt-transport-https \
-      && apt-get install -y sudo \
-      && apt-get install -y docker-engine \
-      && rm -rf /var/lib/apt/lists/*
-RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
+ENV JENKINS_REF /usr/share/jenkins/ref
 
-RUN curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose; \
-chmod +x /usr/local/bin/docker-compose
+# install jenkins plugins
+COPY ./plugins.txt $JENKINS_REF
+RUN /usr/local/bin/install-plugins.sh < $JENKINS_REF/plugins.txt
 
-USER jenkins
-COPY plugins.txt /usr/share/jenkins/plugins.txt
-RUN /usr/local/bin/plugins.sh /usr/share/jenkins/plugins.txt
+RUN apk add --no-cache --virtual make && \
+    apk add --no-cache ca-certificates wget && update-ca-certificates && \
+    apk add --no-cache openssl
+
+VOLUME /var/jenkins
 
