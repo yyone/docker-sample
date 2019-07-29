@@ -10,7 +10,8 @@ RUN /usr/local/bin/install-plugins.sh < $JENKINS_REF/plugins.txt
 
 RUN apk add --no-cache --virtual make && \
     apk add --no-cache ca-certificates wget && update-ca-certificates && \
-    apk add --no-cache openssl
+    apk add --no-cache openssl && \
+    apk add --no-cache sudo
 
 VOLUME /var/jenkins
 
